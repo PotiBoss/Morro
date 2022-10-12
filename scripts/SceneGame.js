@@ -1,38 +1,93 @@
-//import Kratka from './assets/Krata.png';
+import Tile from "./Tile";
+import AI from "./AI";
 
 export default class SceneGame extends Phaser.Scene 
 {
+
+	// 64 every tile
+	// 14 offset 
+	// 5 to center pawn 
+
 	constructor()
 	{
 		super("SceneGame");
-
 	}
 
 	preload() 
 	{
-        this.load.image('BGN', 'assets/Background.png');
-        this.load.image('WhiteTile', 'assets/BialaKratka.png');
-        this.load.image('BlackTile', 'assets/CzarnaKratka.png');
-        this.load.image('Krata', 'assets/Krata.png');
-        this.load.image('BluePawn', 'assets/KropkaBlue.png');
-        this.load.image('RedPawn', 'assets/KropkaRed.png');
+        this.load.image('BGN', 'src/assets/Background.png');
+        this.load.image('WhiteTile', 'src/assets/BialaKratka.png');
+        this.load.image('BlackTile', 'src/assets/CzarnaKratka.png');
+        this.load.image('Grid', 'src/assets/Krata.png');
+        this.load.image('BluePawn', 'src/assets/KropkaBlue.png');
+        this.load.image('RedPawn', 'src/assets/KropkaRed.png');
 	}
 
 	create() 
 	{   
-        console.log("qwe");
-        
         this.add.image(0, 0, "BGN").setScale(5);
+   		this.add.image(0, 0, "Grid").setOrigin(0, 0);
 
-        this.add.image(0, 0, "Krata").setOrigin(0, 0);
+		this.createMap(7);
 
-        let offSet = 0;
-        for(let i = 0; i < 7; i++)
+		this.AI = new AI(this);
+	}
+
+	createMap(numberOfColumns)
+	{
+        let offSetX = 0;
+		let offSetY = 0;
+
+		this.boardArray = Array(7).fill(null).map(() => Array(7));
+
+		this.arrayXIndex = 0;
+		this.arrayYIndex = 0;
+
+		this.numberOfPawns = 0;
+
+		let bTileShouldBeWhite = true;
+
+
+        for(let i = 0; i < numberOfColumns; i++)
         {
-            this.add.image(i*64 + offSet, 0, "WhiteTile").setOrigin(0, 0);
-            offSet += 20;
+			offSetX = 0;
+			this.arrayXIndex = 0;
+
+			for(let j = 0; j < numberOfColumns; j++)
+			{
+				if(bTileShouldBeWhite)
+				{
+					this.tile = new Tile(this, j*64 + offSetX + 32+5, i*64 + offSetY + 32+5, "WhiteTile");
+
+					this.tile.sprite.setInteractive();
+
+					this.tile.XOffset = j*64 + offSetX + 32+5;
+					this.tile.YOffset = i*64 + offSetY + 32+5;
+				
+					bTileShouldBeWhite = false;
+				}
+				else
+				{
+					this.tile = new Tile(this, j*64 + offSetX + 32+5, i*64 + offSetY + 32+5, "BlackTile");
+
+					this.tile.sprite.setInteractive();
+
+					this.tile.XOffset = j*64 + offSetX + 32+5;
+					this.tile.YOffset = i*64 + offSetY + 32+5;
+
+					bTileShouldBeWhite = true;
+				}
+
+				this.tile.indexX = j;
+				this.tile.indexY = i;
+
+				this.boardArray[i][j] = this.tile;
+
+				offSetX += 14;
+				this.arrayXIndex++;
+			}
+			offSetY += 14;
+			this.arrayYIndex++;
         }
-
-
 	}
 }
