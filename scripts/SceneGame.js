@@ -1,5 +1,6 @@
 import Tile from "./Tile";
 import AI from "./AI";
+import Player from "./Player";
 
 export default class SceneGame extends Phaser.Scene 
 {
@@ -30,6 +31,7 @@ export default class SceneGame extends Phaser.Scene
 
 		this.createMap(7);
 
+		this.player =  new Player(this);
 		this.AI = new AI(this);
 	}
 
@@ -38,7 +40,7 @@ export default class SceneGame extends Phaser.Scene
         let offSetX = 0;
 		let offSetY = 0;
 
-		this.boardArray = Array(7).fill(null).map(() => Array(7));
+		this.boardArray = Array.from(Array(7), () => new Array(7));
 
 		this.arrayXIndex = 0;
 		this.arrayYIndex = 0;
@@ -81,7 +83,7 @@ export default class SceneGame extends Phaser.Scene
 				this.tile.indexX = j;
 				this.tile.indexY = i;
 
-				this.boardArray[i][j] = this.tile;
+				this.boardArray[j][i] = this.tile;
 
 				offSetX += 14;
 				this.arrayXIndex++;

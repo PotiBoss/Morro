@@ -6,6 +6,8 @@ export default class AI
 	constructor(scene)
 	{
 		this.scene = scene;
+
+		this.score = 0;
 	}
 
 	makeMove()
@@ -17,7 +19,7 @@ export default class AI
 		{
 			this.tile = this.scene.boardArray[randomTileX][randomTileY];
 
-			this.tile.pawn = new Pawn(this.scene, this.tile.XOffset, this.tile.YOffset, 'RedPawn');
+			this.tile.pawn = new Pawn(this.scene, this.tile.XOffset, this.tile.YOffset, 'RedPawn', this.scene.AI);
 
 			this.scene.numberOfPawns++;
 		}
