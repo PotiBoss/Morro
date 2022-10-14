@@ -34,27 +34,35 @@ export default class SceneGame extends Phaser.Scene
         this.add.image(0, 0, "BGN").setScale(5);
    		this.add.image(0, 0, "Grid").setOrigin(0, 0);
 
-		   this.bGameStarted = false;
+		this.bGameStarted = false;
+
+		this.PvP = this.add.image(700, 50, 'PvP').setInteractive();
+		this.PvP.on('pointerdown', () => {
+			this.bGameStarted = true;
+
+			this.numberOfAI = 0;
+			this.startGame(0);
+		});
 
 		this.PvAI = this.add.image(700, 150, 'PvAi').setInteractive();
 		this.PvAI.on('pointerdown', () => {
 			this.bGameStarted = true;
+
+			this.numberOfAI = 1;
 			this.startGame(1);
 		});
 
 		this.AIvAI = this.add.image(700, 250, 'AivAi').setInteractive();
 		this.AIvAI.on('pointerdown', () => {
 			this.bGameStarted = true;
+
+			this.numberOfAI = 2;
 			this.startGame(2);
 		});
 
 		this.createMap(7);
 
-		this.numberOfAI = 1;
-
 		this.numberOfGames = 0;
-
-	//	this.startGame(this.numberOfAI);
 	}
 
 	createMap(numberOfColumns)
@@ -117,9 +125,16 @@ export default class SceneGame extends Phaser.Scene
 
 	gameOver()
 	{
-		
-
-		if(!this.bIsGameOver && this.numberOfAI == 1)
+		if(!this.bIsGameOver && this.numberOfAI == 0)
+		{
+			this.bIsGameOver = true;
+			this.bGameStarted = false;
+			console.log('gameover');
+			console.log(this.player.score);
+			console.log(this.player2.score);
+			console.log(this.scoreOwner.name);
+		}
+		else if(!this.bIsGameOver && this.numberOfAI == 1)
 		{
 			this.bIsGameOver = true;
 			this.bGameStarted = false;
@@ -164,18 +179,24 @@ export default class SceneGame extends Phaser.Scene
 		this.scoreOwner = null;;
 		this.bIsGameOver = false;
 
+		if(numberOfAI == 0)
+		{
+			this.player =  new Player(this, 'Player 1');
+			this.player2 = new Player(this, 'Player 2');
+		}
+
+		if(numberOfAI == 1)
+		{
+			this.player =  new Player(this, 'Player');
+			this.Ai = new AI(this, 'RedPawn', 'AI');
+		}
+
 		if(numberOfAI == 2)
 		{
 			this.AiPlayer = new AI(this, 'BluePawn', 'AI 1');
 			this.Ai = new AI(this, 'RedPawn', 'AI 2');
 
 			this.AITurn(this.AiPlayer, this.Ai);
-		}
-
-		if(numberOfAI == 1)
-		{
-			this.player =  new Player(this);
-			this.Ai = new AI(this, 'RedPawn', 'AI');
 		}
 	}
 }

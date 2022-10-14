@@ -1,12 +1,12 @@
 export default class Player
 {
-	constructor(scene)
+	constructor(scene, name)
 	{
 		this.scene = scene;
 
 		this.score = 0;
 
-		this.name = 'Player'
+		this.name = name;
 
 		this.numberOfMoves = 1;
 	}

@@ -19,24 +19,67 @@ export default class Tile extends Phaser.Physics.Arcade.Sprite
 		this.sprite = scene.add.image(x, y, sprite);
 
 		this.sprite.on('pointerdown', () => {
-			if(this.scene.bGameStarted == false) { return;}
-			if(this.pawn == null && this.scene.player.numberOfMoves > 0)
+			if(this.scene.numberOfAI == 1)
 			{
-				this.pawn = new Pawn(this.scene, this.XOffset, this.YOffset, 'BluePawn', this.scene.player);
-				this.scene.numberOfPawns++;
-				this.scene.player.numberOfMoves--;
-				this.pawn.checkScore(this, this.scene.player);
-
-				if(this.scene.numberOfPawns == 49)
+				if(this.scene.bGameStarted == false) { return;}
+				if(this.pawn == null && this.scene.player.numberOfMoves > 0)
 				{
-					this.scene.gameOver();
-				}
-
-				if(this.scene.player.numberOfMoves == 0)
-				{
-					for(let i = 0; i < this.scene.score; i++)
+					this.pawn = new Pawn(this.scene, this.XOffset, this.YOffset, 'BluePawn', this.scene.player);
+					this.scene.numberOfPawns++;
+					this.scene.player.numberOfMoves--;
+					this.pawn.checkScore(this, this.scene.player);
+	
+					if(this.scene.numberOfPawns == 49)
 					{
-						this.scene.Ai.makeMove(this.scene.Ai); 
+						this.scene.gameOver();
+					}
+	
+					if(this.scene.player.numberOfMoves == 0)
+					{
+						for(let i = 0; i < this.scene.score; i++)
+						{
+							this.scene.Ai.makeMove(this.scene.Ai); 
+							this.scene.player.numberOfMoves = this.scene.score;
+						}
+					}
+				}
+			}
+
+			else if(this.scene.numberOfAI == 0)
+			{
+				if(this.scene.bGameStarted == false) { return;}
+				if(this.pawn == null && this.scene.player.numberOfMoves > 0)
+				{
+					this.pawn = new Pawn(this.scene, this.XOffset, this.YOffset, 'BluePawn', this.scene.player);
+					this.scene.numberOfPawns++;
+					this.scene.player.numberOfMoves--;
+					this.pawn.checkScore(this, this.scene.player);
+
+					if(this.scene.numberOfPawns == 49)
+					{
+						this.scene.gameOver();
+					}
+	
+					if(this.scene.player.numberOfMoves == 0)
+					{
+						this.scene.player2.numberOfMoves = this.scene.score;
+					}
+				}
+				else if(this.pawn == null && this.scene.player2.numberOfMoves > 0)
+				{
+					this.pawn = new Pawn(this.scene, this.XOffset, this.YOffset, 'RedPawn', this.scene.player2);
+					this.scene.numberOfPawns++;
+					this.scene.player2.numberOfMoves--;
+					this.pawn.checkScore(this, this.scene.player2);
+
+
+					if(this.scene.numberOfPawns == 49)
+					{
+						this.scene.gameOver();
+					}
+	
+					if(this.scene.player2.numberOfMoves == 0)
+					{
 						this.scene.player.numberOfMoves = this.scene.score;
 					}
 				}
