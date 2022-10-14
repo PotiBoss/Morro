@@ -31,8 +31,12 @@ export default class SceneGame extends Phaser.Scene
 
 		this.createMap(7);
 
+		this.score = 1;
+		this.scoreOwner = null;;
+		this.bIsGameOver = false;
+
 		this.player =  new Player(this);
-		this.AI = new AI(this);
+		this.Ai = new AI(this);
 	}
 
 	createMap(numberOfColumns)
@@ -91,5 +95,17 @@ export default class SceneGame extends Phaser.Scene
 			offSetY += 14;
 			this.arrayYIndex++;
         }
+	}
+
+	gameOver()
+	{
+		if(!this.bIsGameOver)
+		{
+			this.bIsGameOver = true;
+			console.log('gameover');
+			console.log(this.player.score);
+			console.log(this.Ai.score);
+			console.log(this.scoreOwner.name);
+		}
 	}
 }

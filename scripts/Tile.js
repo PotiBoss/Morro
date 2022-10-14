@@ -19,15 +19,26 @@ export default class Tile extends Phaser.Physics.Arcade.Sprite
 		this.sprite = scene.add.image(x, y, sprite);
 
 		this.sprite.on('pointerdown', () => {
-			if(this.pawn == null)
+			if(this.pawn == null && this.scene.player.numberOfMoves > 0)
 			{
 				this.pawn = new Pawn(this.scene, this.XOffset, this.YOffset, 'BluePawn', this.scene.player);
-
-				this.pawn.checkScore(this, this.pawn.owner);
-
 				this.scene.numberOfPawns++;
+				this.scene.player.numberOfMoves--;
+				this.pawn.checkScore(this, this.scene.player);
 
-				//this.scene.AI.makeMove(); 
+				if(this.scene.numberOfPawns == 49)
+				{
+					this.scene.gameOver();
+				}
+
+				if(this.scene.player.numberOfMoves == 0)
+				{
+					for(let i = 0; i < this.scene.score; i++)
+					{
+						this.scene.Ai.makeMove(); 
+						this.scene.player.numberOfMoves = this.scene.score;
+					}
+				}
 			}
 		});
 	}

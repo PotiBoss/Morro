@@ -14,7 +14,7 @@ export default class Pawn extends Phaser.Physics.Arcade.Sprite
 	checkScore(tile, owner)
 	{
 		this.scoreTemp = 1;
-
+		
 		this.checkScoreLeft(tile.indexX, tile.indexY, owner);
 		this.checkScoreRight(tile.indexX, tile.indexY, owner);
 		this.sumScore();
@@ -31,7 +31,11 @@ export default class Pawn extends Phaser.Physics.Arcade.Sprite
 		this.checkScoreLeftDown(tile.indexX, tile.indexY, owner);
 		this.sumScore();
 
-		console.log(owner.score);
+		if(owner.score > this.scene.score)
+		{
+			this.scene.score = owner.score;
+			this.scene.scoreOwner = owner;
+		}
 	}
 
 	sumScore()

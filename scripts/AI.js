@@ -7,6 +7,8 @@ export default class AI
 	{
 		this.scene = scene;
 
+		this.name = 'AI'
+
 		this.score = 0;
 	}
 
@@ -19,7 +21,9 @@ export default class AI
 		{
 			this.tile = this.scene.boardArray[randomTileX][randomTileY];
 
-			this.tile.pawn = new Pawn(this.scene, this.tile.XOffset, this.tile.YOffset, 'RedPawn', this.scene.AI);
+			this.tile.pawn = new Pawn(this.scene, this.tile.XOffset, this.tile.YOffset, 'RedPawn', this.scene.Ai);
+
+			this.tile.pawn.checkScore(this.tile, this.scene.Ai);
 
 			this.scene.numberOfPawns++;
 		}
@@ -29,7 +33,7 @@ export default class AI
 		}
 		else
 		{
-			console.log('gameover');
+			this.scene.gameOver();
 		}
 	}
 }
