@@ -35,6 +35,8 @@ export default class SceneGame extends Phaser.Scene
    		this.add.image(0, 0, "Grid").setOrigin(0, 0);
 
 		this.bGameStarted = false;
+		this.gameOverText = null;
+
 
 		this.PvP = this.add.image(700, 50, 'PvP').setInteractive();
 		this.PvP.on('pointerdown', () => {
@@ -129,28 +131,28 @@ export default class SceneGame extends Phaser.Scene
 		{
 			this.bIsGameOver = true;
 			this.bGameStarted = false;
-			console.log('gameover');
-			console.log(this.player.score);
-			console.log(this.player2.score);
-			console.log(this.scoreOwner.name);
+
+			this.gameOverText = this.add.text(10, 550, this.player.name + ' scored: ' + this.player.score + 
+			'\n' + this.player2.name + ' scored: ' + this.player2.score +
+			'\nWinner is: ' + this.scoreOwner.name).setFontSize(32);
 		}
 		else if(!this.bIsGameOver && this.numberOfAI == 1)
 		{
 			this.bIsGameOver = true;
 			this.bGameStarted = false;
-			console.log('gameover');
-			console.log(this.player.score);
-			console.log(this.Ai.score);
-			console.log(this.scoreOwner.name);
+
+			this.gameOverText = this.add.text(10, 550, this.player.name + ' scored: ' + this.player.score + 
+			'\n' + this.Ai.name + ' scored: ' + this.Ai.score +
+			'\nWinner is: ' + this.scoreOwner.name).setFontSize(32);
 		}
 		else if(!this.bIsGameOver && this.numberOfAI == 2)
 		{
 			this.bIsGameOver = true;
 			this.bGameStarted = false;
-			console.log('gameover');
-			console.log(this.AiPlayer.score);
-			console.log(this.Ai.score);
-			console.log(this.scoreOwner.name);
+
+			this.gameOverText = this.add.text(10, 550, this.AiPlayer.name + ' scored: ' + this.AiPlayer.score + 
+			'\n' + this.Ai.name + ' scored: ' + this.Ai.score +
+			'\nWinner is: ' + this.scoreOwner.name).setFontSize(32);
 		}
 	}
 
@@ -172,6 +174,11 @@ export default class SceneGame extends Phaser.Scene
 	startGame(numberOfAI)
 	{
 		this.numberOfGames++;
+
+		if(this.gameOverText != null)
+		{
+			this.gameOverText.destroy();
+		}
 
 		this.createMap(7);
 
