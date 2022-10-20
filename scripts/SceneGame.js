@@ -180,22 +180,30 @@ export default class SceneGame extends Phaser.Scene
 			this.gameOverText.destroy();
 		}
 
+		if(this.turnText != null)
+		{
+			this.turnText.destroy();
+		}
+
 		this.createMap(7);
 
 		this.score = 1;
 		this.scoreOwner = null;;
 		this.bIsGameOver = false;
 
+
 		if(numberOfAI == 0)
 		{
 			this.player =  new Player(this, 'Player 1');
 			this.player2 = new Player(this, 'Player 2');
+			this.turnText = this.add.text(585, 325, this.player.name + ' turn').setFontSize(32);
 		}
 
 		if(numberOfAI == 1)
 		{
 			this.player =  new Player(this, 'Player');
 			this.Ai = new AI(this, 'RedPawn', 'AI');
+			this.turnText = this.add.text(585, 325, this.player.name + ' turn').setFontSize(32);
 		}
 
 		if(numberOfAI == 2)

@@ -62,6 +62,8 @@ export default class Tile extends Phaser.Physics.Arcade.Sprite
 	
 					if(this.scene.player.numberOfMoves == 0)
 					{
+						this.scene.turnText.destroy();
+						this.scene.turnText = this.scene.add.text(585, 325, this.scene.player2.name + ' turn').setFontSize(32);
 						this.scene.player2.numberOfMoves = this.scene.score;
 					}
 				}
@@ -72,7 +74,6 @@ export default class Tile extends Phaser.Physics.Arcade.Sprite
 					this.scene.player2.numberOfMoves--;
 					this.pawn.checkScore(this, this.scene.player2);
 
-
 					if(this.scene.numberOfPawns == 49)
 					{
 						this.scene.gameOver();
@@ -80,6 +81,8 @@ export default class Tile extends Phaser.Physics.Arcade.Sprite
 	
 					if(this.scene.player2.numberOfMoves == 0)
 					{
+						this.scene.turnText.destroy();
+						this.scene.turnText = this.scene.add.text(585, 325, this.scene.player.name + ' turn').setFontSize(32);
 						this.scene.player.numberOfMoves = this.scene.score;
 					}
 				}
