@@ -16,9 +16,10 @@ export default class AI
 
 	makeMove(Ai)
 	{
-		console.log()
 		let randomTileX = Math.floor(Math.random() * 7);
 		let randomTileY = Math.floor(Math.random() * 7);
+
+		//this.scene.time.delayedCall(3000, this.makeMove, [Ai], this);
 
 		if(this.scene.boardArray[randomTileX][randomTileY].pawn == null)
 		{
@@ -39,4 +40,5 @@ export default class AI
 			this.scene.gameOver();
 		}
 	}
+
 }

@@ -1,3 +1,4 @@
+import Phaser from 'phaser';
 import Tile from "./Tile";
 import AI from "./AI";
 import Player from "./Player";
@@ -36,12 +37,12 @@ export default class SceneGame extends Phaser.Scene
 
 		this.bGameStarted = false;
 		this.gameOverText = null;
-		this.AIDelay = true;
+		
+		this.timerArray = [];
 
 		this.PvP = this.add.image(700, 50, 'PvP').setInteractive();
 		this.PvP.on('pointerdown', () => {
 			this.bGameStarted = true;
-
 			this.numberOfAI = 0;
 			this.startGame(0);
 		});
@@ -57,7 +58,15 @@ export default class SceneGame extends Phaser.Scene
 		this.AIvAI = this.add.image(700, 250, 'AivAi').setInteractive();
 		this.AIvAI.on('pointerdown', () => {
 			this.bGameStarted = true;
+			this.AIDelay = false;
+			this.numberOfAI = 2;
+			this.startGame(2);
+		});
 
+		this.AIvAIDelay = this.add.image(850, 250, 'AivAi').setInteractive();
+		this.AIvAIDelay.on('pointerdown', () => {
+			this.bGameStarted = true;
+			this.AIDelay = true;
 			this.numberOfAI = 2;
 			this.startGame(2);
 		});
@@ -164,26 +173,24 @@ export default class SceneGame extends Phaser.Scene
 			return;
 		}
 
-	
-
 		if(!this.AIDelay)
 		{
 			for(let i = 0; i < this.score; i++)
 			{
 				Ai.makeMove(Ai); 
 			}
+			this.AITurn(OtherAi, Ai)
 		}
 		else
 		{			
-				this.time.delayedCall(3000, Ai.makeMove(Ai), [], Ai);
-
-				this.timer = this.time.addEvent({ 
-				delay: 3000, 
-				callback: Ai.makeMove(Ai),
-				callbackScope: Ai});
+			for(let i = 0; i < this.score; i++)
+			{
+				var timer = this.time.delayedCall(1000 + i * 1000, Ai.makeMove, [Ai], Ai);
+				this.timerArray.push(timer);
+			}
+			var endTurnTimer = this.time.delayedCall(2000 + this.score * 1000, this.AITurn, [OtherAi, Ai], this);
+			this.timerArray.push(endTurnTimer);
 		}
-
-	//	this.AITurn(OtherAi, Ai)
 	}
 
 	startGame(numberOfAI)
@@ -199,6 +206,10 @@ export default class SceneGame extends Phaser.Scene
 		{
 			this.turnText.destroy();
 		}
+
+		this.timerArray.forEach(timer => {
+			timer.remove();
+		});
 
 		this.createMap(7);
 
