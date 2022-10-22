@@ -16,6 +16,7 @@ export default class AI
 
 	makeMove(Ai)
 	{
+		console.log()
 		let randomTileX = Math.floor(Math.random() * 7);
 		let randomTileY = Math.floor(Math.random() * 7);
 

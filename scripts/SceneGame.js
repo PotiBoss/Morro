@@ -36,7 +36,7 @@ export default class SceneGame extends Phaser.Scene
 
 		this.bGameStarted = false;
 		this.gameOverText = null;
-
+		this.AIDelay = true;
 
 		this.PvP = this.add.image(700, 50, 'PvP').setInteractive();
 		this.PvP.on('pointerdown', () => {
@@ -164,11 +164,26 @@ export default class SceneGame extends Phaser.Scene
 			return;
 		}
 
-		for(let i = 0; i < this.score; i++)
+	
+
+		if(!this.AIDelay)
 		{
-			Ai.makeMove(Ai); 
+			for(let i = 0; i < this.score; i++)
+			{
+				Ai.makeMove(Ai); 
+			}
 		}
-		this.AITurn(OtherAi, Ai)
+		else
+		{			
+				this.time.delayedCall(3000, Ai.makeMove(Ai), [], Ai);
+
+				this.timer = this.time.addEvent({ 
+				delay: 3000, 
+				callback: Ai.makeMove(Ai),
+				callbackScope: Ai});
+		}
+
+	//	this.AITurn(OtherAi, Ai)
 	}
 
 	startGame(numberOfAI)
