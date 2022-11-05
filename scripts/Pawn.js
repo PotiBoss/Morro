@@ -14,6 +14,7 @@ export default class Pawn extends Phaser.Physics.Arcade.Sprite
 
 	checkScore(tile, owner, bShouldReturnScore, fitnessObject)
 	{
+		
 		this.scoreTemp = 1;
 
 		this.potentialScore = 0;
@@ -49,6 +50,8 @@ export default class Pawn extends Phaser.Physics.Arcade.Sprite
 
 			return this.potentialScore;
 		}
+		
+		
 	}
 
 	sumScore(bShouldReturnScore, owner, tile)
