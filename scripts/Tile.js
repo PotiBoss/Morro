@@ -9,6 +9,7 @@ export default class Tile extends Phaser.Physics.Arcade.Sprite
 		this.scene = scene;
 
 		this.pawn = null;
+		this.shadowPawn = false;
 
 		this.indexX = 0;
 		this.indexY = 0;

@@ -12,6 +12,11 @@ export default class SceneGame extends Phaser.Scene
 
 	// Complexity 25^49
 
+	/* enum
+		0 = random
+		1 = minimax
+	*/
+
 	constructor()
 	{
 		super("SceneGame");
@@ -90,6 +95,7 @@ export default class SceneGame extends Phaser.Scene
 
 		let bTileShouldBeWhite = true;
 
+		this.AIType = 1;
 
         for(let i = 0; i < numberOfColumns; i++)
         {
@@ -178,6 +184,7 @@ export default class SceneGame extends Phaser.Scene
 			for(let i = 0; i < this.score; i++)
 			{
 				Ai.makeMove(Ai); 
+				
 			}
 			this.AITurn(OtherAi, Ai)
 		}
