@@ -184,7 +184,6 @@ export default class SceneGame extends Phaser.Scene
 			for(let i = 0; i < this.score; i++)
 			{
 				Ai.makeMove(Ai); 
-				
 			}
 			this.AITurn(OtherAi, Ai)
 		}

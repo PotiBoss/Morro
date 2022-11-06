@@ -237,7 +237,6 @@ export default class AI
 					if(this.scene.boardArray[element2.indexY][element2.indexX].pawn == null || this.scene.boardArray[element2.indexY][element2.indexX].shadowPawn == true)
 					{
 						this.dummyPawn = new Pawn(this.scene, -100, -100, 'RedPawn', this.scene.Ai);
-
 						var fitnessObject =
 						{
 							fitness: 0,
@@ -247,8 +246,7 @@ export default class AI
 							potential: 0, // means potential for future turns aka how many empty or taken by the same player tiles are near
 						}
 
-					//	this.dummyPawn.checkScore(this.scene.boardArray[element2.indexY][element2.indexX], this.scene.Ai, true, fitnessObject);
-					//	this.dummyPawn.checkScore(this.scene.boardArray[element2.indexY][element2.indexX], this.scene.Ai, true, fitnessObject);
+				//		this.dummyPawn.checkScore(this.scene.boardArray[element2.indexY][element2.indexX], this.scene.Ai, true, fitnessObject);
 						this.dummyPawn.checkPotential(this.scene.boardArray[element2.indexY][element2.indexX], this.scene.Ai, fitnessObject);
 
 						fitnessObject.fitness = fitnessObject.score * 10 + fitnessObject.potential;
@@ -278,7 +276,7 @@ export default class AI
 							potential: 0, // means potential for future turns aka how many empty or taken by the same player tiles are near
 						}
 
-						this.dummyPawn.checkScore(this.scene.boardArray[element2.indexY][element2.indexX], this.scene.AiPlayer, true, fitnessObject);
+					//	this.dummyPawn.checkScore(this.scene.boardArray[element2.indexY][element2.indexX], this.scene.AiPlayer, true, fitnessObject);
 						this.dummyPawn.checkPotential(this.scene.boardArray[element2.indexY][element2.indexX], this.scene.AiPlayer, fitnessObject);
 
 						fitnessObject.fitness = fitnessObject.score * 10 + fitnessObject.potential;
