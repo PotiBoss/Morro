@@ -35,12 +35,6 @@ export default class Pawn extends Phaser.Physics.Arcade.Sprite
 		this.checkScoreLeftDown(tile.indexX, tile.indexY, owner);
 		this.sumScore(bShouldReturnScore, owner, tile);
 
-		if(owner.score > this.scene.score)
-		{
-			this.scene.score = owner.score;
-			this.scene.scoreOwner = owner;
-		}
-
 		if(bShouldReturnScore)
 		{
 			//return owner.score;
@@ -50,7 +44,12 @@ export default class Pawn extends Phaser.Physics.Arcade.Sprite
 
 			return this.potentialScore;
 		}
-		
+
+		if(owner.score > this.scene.score)
+		{
+			this.scene.score = owner.score;
+			this.scene.scoreOwner = owner;
+		}
 		
 	}
 

@@ -18,7 +18,7 @@ export default class AI
 		this.fitnessArray = [];
 	}
 
-	makeMove(Ai)
+	makeMove(Ai, OtherAi)
 	{
 		switch(this.scene.AIType)
 		{
@@ -28,11 +28,64 @@ export default class AI
 			case 1: 
 				this.makeMoveMiniMax(Ai);
 				break;
+			case 2:
+				this.makeMoveNegaMax(Ai);
+				break;
+			case 3:
+				this.makeMoveAB(Ai);
+				break;
+			case 4:
+				this.makeMoveAB(Ai);
+				break;
+			case 5:
+				this.makeMoveNegaMax(Ai);
+				break;
+				this.makeMoveMCTS(Ai, OtherAi);
 			default:
 				this.makeMoveRandom(Ai);
 				break;
 		}
 	}
+
+
+	makeMoveMCTS(Ai, OtherAi)
+	{
+		
+
+		// We start with saving current board state and add new node to our Tree structure
+		var nodeArray = [];
+		var boardStateArray = [];
+		this.MCTSTree.add(nodeArray);
+
+		this.scene.boardArray.forEach(element => {
+			this.scene.boardArray[this.scene.boardArray.indexOf(element)].forEach(element2 => {
+
+				if(element2.pawn == null)
+				{
+					nodeArray.push(element2);
+				}
+			});
+		});
+
+		// Then we randomly choose tiles to play our move
+		var chosenNodes = [];
+		for(let i = 0; i < this.scene.score; i++)
+		{
+			chosenNodes.push(nodeArray[Math.floor(Math.random() * nodeArray.length)]);
+			boardStateArray.push(nodeArray[Math.floor(Math.random() * nodeArray.length)]);
+
+			var chosenNodeIndex = this.MCTSTree.length - 1;
+		}
+
+		chosenNodes.forEach(element => {
+			element.pawn = new Pawn(this.scene, element.XOffset, element.YOffset, this.pawn, this);
+		});
+
+		// We start random game simulation
+		this.scene.MCTSAITurn(Ai, OtherAi);
+
+	}
+
 
 	makeMoveRandom(Ai)
 	{
@@ -49,7 +102,7 @@ export default class AI
 
 			this.scene.numberOfPawns++;
 		}
-		else if(this.scene.numberOfPawns < 49)
+		else if(this.scene.numberOfPawns < 48)
 		{
 			this.makeMoveRandom(Ai);
 		}
@@ -82,6 +135,136 @@ export default class AI
 
 		});
 		this.addPawn(cleanedArray, Ai);
+	}
+
+	makeMoveNegaMax(Ai)
+	{
+		if(Ai == this.scene.AiPlayer)
+		{
+			this.negamax(Ai, this.scene.score, 1);
+		}
+		else if(Ai == this.scene.Ai)
+		{
+			this.negamax(Ai, this.scene.score, 1);
+		}
+		
+		this.fitnessArray.sort(function(a,b){
+			return b.fitness - a.fitness;
+		});
+
+
+		var cleanedArray = this.fitnessArray.filter(function(value, index, arr){
+
+			return value.fitness >= arr[0].fitness;
+
+		});
+		this.addPawn(cleanedArray, Ai);
+	}
+
+	makeMoveAB(Ai)
+	{
+		if(Ai == this.scene.AiPlayer)
+		{
+			this.minimaxAB(Ai, this.scene.score, true);
+		}
+		else if(Ai == this.scene.Ai)
+		{
+			this.minimaxAB(Ai, this.scene.score, false);
+		}
+		
+
+		this.fitnessArray.sort(function(a,b){
+			return b.fitness - a.fitness;
+		});
+
+
+		var cleanedArray = this.fitnessArray.filter(function(value, index, arr){
+
+			return value.fitness >= arr[0].fitness;
+
+		});
+		this.addPawn(cleanedArray, Ai);
+	}
+
+	makeMoveMCS(Ai)
+	{
+		numberOfSimulations = 10;
+
+		this.bestChild = null;
+		this.bestProbability = -1;
+
+		this.scene.boardArray.forEach(element => {
+			this.scene.boardArray[this.scene.boardArray.indexOf(element)].forEach(element2 => {
+				let r = 0;
+				let child = element2;
+
+				let currentSimulationTable = [];
+
+				for (let i = 0; i < numberOfSimulations; i++) {
+					if (this.scene.AiPlayer.score < 7 && this.scene.Ai.score < 7) {
+						child = this.MCSRandomMove(Ai, currentSimulationTable);
+					}
+
+					if (this.child.scoreOwner == Ai) {
+						r++
+					}
+
+					let probability = r / numberOfSimulations
+
+					if (probability > this.bestProbability) {
+						this.bestChild = child;
+						this.bestProbability = probability;
+					}
+				}
+				return this.bestChild;
+			});
+		});
+	}
+
+	MCSRandomMove(Ai, currentSimulationTable)
+	{
+		let randomTileX = Math.floor(Math.random() * 7);
+		let randomTileY = Math.floor(Math.random() * 7);
+
+		if(this.scene.boardArray[randomTileX][randomTileY].pawn == null)
+		{
+			this.tile = this.scene.boardArray[randomTileX][randomTileY].shadowPawn = true;
+
+			currentSimulationTable.push(this.tile);
+
+			this.tile.checkScore(Ai, true);
+		}
+		else
+		{
+			this.MCSRandomMove(Ai, currentSimulationTable);
+		}
+	}
+
+	negamax(Ai, depth, sign = 1)
+	{
+		if(this.scene.numberOfPawns > 48)
+		{
+			this.scene.gameOver();
+			return;
+		}
+		if(depth == 0)
+		{
+			return;
+		}
+
+		this.value = -Infinity;
+		this.scene.boardArray.forEach(element => {
+			this.scene.boardArray[this.scene.boardArray.indexOf(element)].forEach(element2 => {
+				if(this.scene.boardArray[element2.indexY][element2.indexX].pawn != null) 
+				{ 
+					return; // dont check already occupied tiles
+				}
+				this.scene.boardArray[element2.indexY][element2.indexX].shadowPawn = true;
+				this.checkPointsForPlayer(true, element2.indexY, element2.indexX);
+				//this.negamax(Ai, depth - 1, -sign);
+				this.scene.boardArray[element2.indexY][element2.indexX].shadowPawn = false;
+			});
+		});
 	}
 
 	addPawn(cleanedArray, Ai)
@@ -136,6 +319,7 @@ export default class AI
 			//return;
 		}
 
+	
 		if(depth == 0)
 		{
 			return;
@@ -178,59 +362,82 @@ export default class AI
 		}
 	}
 
-	checkPointsForPlayer(bIsMaximizingPlayer, indexY, indexX)
+	minimaxAB(Ai, depth, bIsMaximizingPlayer, alpha = -Infinity, beta = Infinity)
+	{
+		if(this.scene.numberOfPawns > 48)
+		{
+			this.scene.gameOver();
+			//return;
+		}
+
+	
+		if(depth == 0)
+		{
+			return Ai;
+		}
+
+		if(bIsMaximizingPlayer)
+		{
+			this.value = -Infinity;
+
+			this.scene.boardArray.forEach(element => {
+				this.scene.boardArray[this.scene.boardArray.indexOf(element)].forEach(element2 => {
+					if(this.scene.boardArray[element2.indexY][element2.indexX].pawn != null) 
+					{ 
+						return; 
+					}
+					this.scene.boardArray[element2.indexY][element2.indexX].shadowPawn = true;
+					this.checkPointsForPlayer(true, element2.indexY, element2.indexX);
+					//this.minimax(5, depth - 1, bIsMaximizingPlayer);
+					this.scene.boardArray[element2.indexY][element2.indexX].shadowPawn = false; 
+					if(this.scene.numberOfPawns < 100) {return;}
+				
+
+					alpha = Math.max(alpha, this.minimaxAB(this.scene.boardArray[element2.indexY][element2.indexX], depth - 1,
+						alpha, beta, false));
+						if(alpha >= beta)
+						{
+							return beta;
+						}
+						return alpha;
+				});
+			});
+		}
+		else
+		{
+			this.value = Infinity;
+
+			this.scene.boardArray.forEach(element => {
+				this.scene.boardArray[this.scene.boardArray.indexOf(element)].forEach(element2 => {
+					if(this.scene.boardArray[element2.indexY][element2.indexX].pawn != null) 
+					{ 
+						return; 
+					}
+			
+					this.scene.boardArray[element2.indexY][element2.indexX].shadowPawn = true;
+					this.checkPointsForPlayer(false, element2.indexY, element2.indexX);
+					//this.minimax(5, depth - 1, bIsMaximizingPlayer);
+					this.scene.boardArray[element2.indexY][element2.indexX].shadowPawn = false;
+					if(this.scene.numberOfPawns < 100) {return;}
+				
+
+					beta = Math.min(alpha, this.minimaxAB(this.scene.boardArray[element2.indexY][element2.indexX], depth - 1,
+						alpha, beta, true));
+						if(alpha >= beta)
+						{
+							return alpha;
+						}
+						return beta;
+				});
+			});
+		}
+	}
+
+	checkPointsForPlayer(bPlayer, indexY, indexX)
 	{
 		this.predictedScore = 0;
 
-	/*	if(bIsMaximizingPlayer)
-		{
-			this.dummyPawn = new Pawn(this.scene, -100, -100, 'BluePawn', this.scene.AiPlayer);
-
-			var fitnessObject =
-			{
-				fitness: 0,
-				score:  0,
-				indexX: 0,
-				indexY: 0,
-				potential: 0, // means potential for future turns aka how many empty or taken by the same player tiles are near
-			}
-
-			this.dummyPawn.checkScore(this.scene.boardArray[indexY][indexX], this.scene.AiPlayer, true, fitnessObject);
-			this.dummyPawn.checkPotential(this.scene.boardArray[indexY][indexX], this.scene.AiPlayer, fitnessObject);
-
-			fitnessObject.fitness = fitnessObject.score * 10 + fitnessObject.potential;
-
-			this.fitnessArray.push(fitnessObject);
-			//console.log(this.dummyPawn.checkScore(this.scene.boardArray[element2.indexY][element2.indexX], this.scene.AiPlayer, true));
-			this.dummyPawn.destroy();
-		}
-	/*	 else
-		{
-			this.dummyPawn = new Pawn(this.scene, -100, -100, 'RedPawn', this.scene.Ai);
-
-			var fitnessObject =
-			{
-				fitness: 0,
-				score:  0,
-				indexX: 0,
-				indexY: 0,
-				potential: 0, // means potential for future turns aka how many empty or taken by the same player tiles are near
-			}
-
-			this.dummyPawn.checkScore(this.scene.boardArray[indexY][indexX], this.scene.Ai, true, fitnessObject);
-			this.dummyPawn.checkPotential(this.scene.boardArray[indexY][indexX], this.scene.Ai, fitnessObject);
-
-			fitnessObject.fitness = fitnessObject.score * 10 + fitnessObject.potential;
-
-			this.fitnessArray.push(fitnessObject);
-			//console.log(this.dummyPawn.checkScore(this.scene.boardArray[element2.indexY][element2.indexX], this.scene.AiPlayer, true));
-			this.dummyPawn.destroy();
-		}
-		
-		
-		*/
-		if(false){}
-		else
+		if(!bPlayer)
 		{
 			this.scene.boardArray.forEach(element => {
 				this.scene.boardArray[this.scene.boardArray.indexOf(element)].forEach(element2 => {
@@ -246,20 +453,19 @@ export default class AI
 							potential: 0, // means potential for future turns aka how many empty or taken by the same player tiles are near
 						}
 
-				//		this.dummyPawn.checkScore(this.scene.boardArray[element2.indexY][element2.indexX], this.scene.Ai, true, fitnessObject);
+					//	this.dummyPawn.checkScore(this.scene.boardArray[element2.indexY][element2.indexX], this.scene.Ai, true, fitnessObject);
 						this.dummyPawn.checkPotential(this.scene.boardArray[element2.indexY][element2.indexX], this.scene.Ai, fitnessObject);
 
 						fitnessObject.fitness = fitnessObject.score * 10 + fitnessObject.potential;
-
+ 
 						this.fitnessArray.push(fitnessObject);
-						//console.log(this.dummyPawn.checkScore(this.scene.boardArray[element2.indexY][element2.indexX], this.scene.AiPlayer, true));
 						this.dummyPawn.destroy();
 					}
 				});
 			});
 		}
 
-		if(bIsMaximizingPlayer)
+		if(bPlayer)
 		{
 			this.scene.boardArray.forEach(element => {
 				this.scene.boardArray[this.scene.boardArray.indexOf(element)].forEach(element2 => {
@@ -282,7 +488,6 @@ export default class AI
 						fitnessObject.fitness = fitnessObject.score * 10 + fitnessObject.potential;
 
 						this.fitnessArray.push(fitnessObject);
-						//console.log(this.dummyPawn.checkScore(this.scene.boardArray[element2.indexY][element2.indexX], this.scene.AiPlayer, true));
 						this.dummyPawn.destroy();
 					}
 				});

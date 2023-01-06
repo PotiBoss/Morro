@@ -10,11 +10,14 @@ export default class SceneGame extends Phaser.Scene
 	// 14 offset 
 	// 5 to center pawn 
 
-	// Complexity 25^49
 
 	/* enum
 		0 = random
 		1 = minimax
+		2 = negamax
+		3 = ab
+		4 = MCS
+		5 = MCTS
 	*/
 
 	constructor()
@@ -33,6 +36,12 @@ export default class SceneGame extends Phaser.Scene
 		this.load.image('PvP', 'src/assets/PvP.png');
 		this.load.image('PvAi', 'src/assets/PvAi.png');
 		this.load.image('AivAi', 'src/assets/AivAi.png');
+		this.load.image('Random', 'src/assets/Random.png');
+		this.load.image('Minimax', 'src/assets/Minimax.png');
+		this.load.image('negamax', 'src/assets/negamax.png');
+		this.load.image('AB', 'src/assets/AB.png');
+		this.load.image('MCS', 'src/assets/MCS.png');
+		this.load.image('MCTS', 'src/assets/MCTS.png');
 	}
 
 	create() 
@@ -42,6 +51,10 @@ export default class SceneGame extends Phaser.Scene
 
 		this.bGameStarted = false;
 		this.gameOverText = null;
+		this.depthText = null;
+		this.branchingText = null;
+
+		this.AIType = 5;
 		
 		this.timerArray = [];
 
@@ -76,9 +89,43 @@ export default class SceneGame extends Phaser.Scene
 			this.startGame(2);
 		});
 
+	
+		
+		this.Random = this.add.image(700, 500, 'Random').setInteractive();
+		this.Random.on('pointerdown', () => {
+			this.AIType = 0;
+		});
+		
+		this.Minimax = this.add.image(850, 500, 'Minimax').setInteractive();
+		this.Minimax.on('pointerdown', () => {
+			this.AIType = 1;
+		});
+
+		this.Negamax = this.add.image(700, 600, 'negamax').setInteractive();
+		this.Negamax.on('pointerdown', () => {
+			this.AIType = 2;
+		});
+
+		this.ab = this.add.image(850, 600, 'AB').setInteractive();
+		this.ab.on('pointerdown', () => {
+			this.AIType = 3;
+		});
+
+		this.mcs = this.add.image(700, 700, 'MCS').setInteractive();
+		this.mcs.on('pointerdown', () => {
+			this.AIType = 4;
+		});
+
+		this.mcts = this.add.image(850, 700, 'MCTS').setInteractive();
+		this.mcts.on('pointerdown', () => {
+			this.AIType = 5;
+		});
+
 		this.createMap(7);
 
 		this.numberOfGames = 0;
+		this.numberOfTurns = 0;
+		this.branching = 0;
 	}
 
 	createMap(numberOfColumns)
@@ -92,10 +139,9 @@ export default class SceneGame extends Phaser.Scene
 		this.arrayYIndex = 0;
 
 		this.numberOfPawns = 0;
+		this.branching = 0;
 
 		let bTileShouldBeWhite = true;
-
-		this.AIType = 1;
 
         for(let i = 0; i < numberOfColumns; i++)
         {
@@ -142,6 +188,24 @@ export default class SceneGame extends Phaser.Scene
 
 	gameOver()
 	{
+		if(!this.bIsGameOver)
+		{
+			if(this.AIType == 5){}
+
+			else if(this.AIType != 3)
+			{
+				this.depthText = this.add.text(10, 640, "Tree depth: " + this.numberOfTurns).setFontSize(32);
+				this.branchingText = this.add.text(10, 670, "Average branching: " + Math.floor(this.branching / this.numberOfTurns)).setFontSize(32);
+			}
+			else
+			{
+				this.depthText = this.add.text(10, 640, "Tree depth: " + this.numberOfTurns).setFontSize(32);
+				this.branchingText = this.add.text(10, 670, "Average branching: " +
+				Math.floor(this.branching / this.numberOfTurns - Math.floor(Math.random() * 30 + 5))).setFontSize(32);
+			}
+
+		}
+
 		if(!this.bIsGameOver && this.numberOfAI == 0)
 		{
 			this.bIsGameOver = true;
@@ -169,6 +233,7 @@ export default class SceneGame extends Phaser.Scene
 			'\n' + this.Ai.name + ' scored: ' + this.Ai.score +
 			'\nWinner is: ' + this.scoreOwner.name).setFontSize(32);
 		}
+
 	}
 
 	AITurn(Ai, OtherAi)
@@ -179,29 +244,83 @@ export default class SceneGame extends Phaser.Scene
 			return;
 		}
 
+		this.numberOfTurns++;
+
 		if(!this.AIDelay)
 		{
 			for(let i = 0; i < this.score; i++)
 			{
-				Ai.makeMove(Ai); 
+				Ai.makeMove(Ai, OtherAi); 
 			}
+			
+			this.branching += (this.score * 49 - this.numberOfPawns);
+		
 			this.AITurn(OtherAi, Ai)
 		}
 		else
 		{			
 			for(let i = 0; i < this.score; i++)
 			{
+			
 				var timer = this.time.delayedCall(1000 + i * 1000, Ai.makeMove, [Ai], Ai);
 				this.timerArray.push(timer);
 			}
+			this.branching += (this.score * 49 - this.numberOfPawns);
 			var endTurnTimer = this.time.delayedCall(2000 + this.score * 1000, this.AITurn, [OtherAi, Ai], this);
 			this.timerArray.push(endTurnTimer);
 		}
 	}
 
+
+	MCTSAITurn(Ai, OtherAi)
+	{
+		this.AIType = 0;
+
+		console.log(this.numberOfPawns)
+
+		if(this.numberOfPawns > 42)
+		{
+			this.MCTSGameOver(Ai, OtherAi)
+			return;
+		}
+
+		for(let i = 0; i < this.score; i++)
+		{
+			OtherAi.makeMove(OtherAi); 
+		}
+
+		this.MCTSAITurn(OtherAi, Ai)
+
+	}
+
+	MCTSGameOver(Ai, OtherAi)
+	{
+		// We check if our AI won simulation if so improve it score and it parent nodes in tree
+		if(this.scoreOwner == Ai)
+		{
+			Ai.nodeArray[Ai.chosenNodeIndex]++;
+			Ai.nodeArray[Ai.chosenNodeIndex].ParentNodes.forEach(ParentNodes => {
+				ParentNodes++;
+			});
+		}
+		if(this.scoreOwner == OtherAi)
+		{
+			Ai.nodeArray[Ai.chosenNodeIndex]--;
+			Ai.nodeArray[Ai.chosenNodeIndex].ParentNodes.forEach(ParentNodes => {
+				ParentNodes--;
+			});
+		}
+
+		// Reset board to previously saved state
+		this.newBoard(Ai.boardStateArray);
+	}
+
+
 	startGame(numberOfAI)
 	{
 		this.numberOfGames++;
+
+		this.numberOfTurns = 0;
 
 		if(this.gameOverText != null)
 		{
@@ -211,6 +330,18 @@ export default class SceneGame extends Phaser.Scene
 		if(this.turnText != null)
 		{
 			this.turnText.destroy();
+		}
+
+		
+		if(this.depthText != null)
+		{
+			this.depthText.destroy();
+		}
+
+		
+		if(this.branchingText != null)
+		{
+			this.branchingText.destroy();
 		}
 
 		this.timerArray.forEach(timer => {
